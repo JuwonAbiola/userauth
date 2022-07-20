@@ -13,11 +13,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AuthRoutes.login:
       return MaterialPageRoute(builder: (context) => const LoginScreen());
     case HomeRoutes.home:
-      HomeScreen? arg = settings.arguments as HomeScreen?;
-      return MaterialPageRoute(
-          builder: (context) => HomeScreen(
-                user: arg!.user,
-              ));
+      return MaterialPageRoute(builder: (context) => const HomeScreen());
     default:
       {
         return MaterialPageRoute(builder: (context) => const LoginScreen());
