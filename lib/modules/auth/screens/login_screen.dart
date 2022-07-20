@@ -4,6 +4,8 @@ import 'package:userauth/helpers/alert_helper.dart';
 import 'package:userauth/modules/auth/models/login_model.dart';
 import 'package:userauth/modules/auth/routes/route.dart';
 import 'package:userauth/modules/auth/services/auth_service.dart';
+import 'package:userauth/modules/home/routes/route.dart';
+import 'package:userauth/modules/home/screens/home_screen.dart';
 import 'package:validators/validators.dart' as validator;
 
 class LoginScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const SizedBox(),
         title: const Text('Login'),
       ),
       body: Padding(
@@ -35,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _emailTextController,
                 validator: (value) {
-                  if (!validator.isEmail(value!)) {
+                  if (!validator.isEmail(value!.trim())) {
                     return 'enter a valid mail';
                   }
                   return null;
@@ -82,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 onChanged: (value) {},
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value!.trim().isEmpty) {
                     return 'enter password';
                   }
                   return null;
@@ -100,6 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     try {
                       User? user =
                           await AuthService.login(loginModel: _loginModel);
+                      if (user != null) {
+                        Navigator.popAndPushNamed(context, HomeRoutes.home,
+                            arguments: HomeScreen(user: user));
+                      }
                     } catch (e) {
                       showAlert(
                         context: context,

@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:userauth/helpers/alert_helper.dart';
 import 'package:userauth/modules/auth/models/signup_model.dart';
-import 'package:userauth/modules/auth/routes/route.dart';
 import 'package:userauth/modules/auth/services/auth_service.dart';
 import 'package:validators/validators.dart' as validator;
 
@@ -36,7 +34,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               TextFormField(
                 controller: _nameTextController,
                 validator: (value) {
-                  if (!validator.isAlpha(value!)) {
+                  if (!validator.isAlpha(value!.trim())) {
                     return 'enter a valid name';
                   }
                   return null;
@@ -59,7 +57,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               TextFormField(
                 controller: _emailTextController,
                 validator: (value) {
-                  if (!validator.isEmail(value!)) {
+                  if (!validator.isEmail(value!.trim())) {
                     return 'enter a valid mail';
                   }
                   return null;
@@ -104,9 +102,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                 ),
-                onChanged: (value) {},
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value!.trim().isEmpty) {
                     return 'enter password';
                   }
                   return null;
@@ -122,8 +119,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       _isLoading = true;
                     });
                     try {
-                      User? user =
-                          await AuthService.signUp(signupModel: _signUpModel);
+                      await AuthService.signUp(signupModel: _signUpModel);
+                      Navigator.pop(context);
                       showAlert(
                         context: context,
                         title: 'Success',
@@ -152,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, AuthRoutes.login);
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       "Login",
