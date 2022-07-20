@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:userauth/helpers/alert_helper.dart';
 import 'package:userauth/modules/auth/models/login_model.dart';
 import 'package:userauth/modules/auth/routes/route.dart';
 import 'package:userauth/modules/auth/services/auth_service.dart';
 import 'package:userauth/modules/home/routes/route.dart';
-import 'package:userauth/modules/home/screens/home_screen.dart';
 import 'package:validators/validators.dart' as validator;
 
 class LoginScreen extends StatefulWidget {
@@ -16,12 +18,28 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  FirebaseAuth auth = FirebaseAuth.instance;
   final _emailTextController = TextEditingController();
   final _passwordTextController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
   bool obscureText = true;
   bool _isLoading = false;
+  IconData? authIcon;
   late final LoginModel _loginModel = LoginModel();
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    checkingForBioMetrics().whenComplete(() => null);
+    FirebaseAuth.instance.authStateChanges().listen((User? userData) {
+      setState(() {
+        user = userData;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,11 +119,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       _isLoading = true;
                     });
                     try {
-                      User? user =
+                      User? userLogin =
                           await AuthService.login(loginModel: _loginModel);
-                      if (user != null) {
-                        Navigator.popAndPushNamed(context, HomeRoutes.home,
-                            arguments: HomeScreen(user: user));
+                      if (userLogin != null) {
+                        Navigator.popAndPushNamed(context, HomeRoutes.home);
                       }
                     } catch (e) {
                       showAlert(
@@ -137,11 +154,69 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ],
-              )
+              ),
+              const SizedBox(height: 20),
+              (authIcon != null)
+                  ? IconButton(
+                      onPressed: () async {
+                        if (user != null) {
+                          await _authenticateMe()
+                              ? Navigator.popAndPushNamed(
+                                  context, HomeRoutes.home)
+                              : null;
+                        } else {
+                          showAlert(
+                            context: context,
+                            title: 'Oops!',
+                            content: 'You are not authenticated',
+                          );
+                        }
+                      },
+                      icon: Icon(
+                        authIcon!,
+                        size: 40,
+                      ))
+                  : const SizedBox(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Future<bool> checkingForBioMetrics() async {
+    bool canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
+
+    List<BiometricType> availableBiometrics =
+        await _localAuthentication.getAvailableBiometrics();
+
+    if (Platform.isIOS) {
+      if (availableBiometrics.contains(BiometricType.face)) {
+        setState(() {
+          authIcon = Icons.face_outlined;
+        });
+      } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        setState(() {
+          authIcon = Icons.fingerprint_outlined;
+        });
+      }
+    }
+    if (Platform.isAndroid) {
+      if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        setState(() {
+          authIcon = Icons.fingerprint_outlined;
+        });
+      }
+    }
+    return canCheckBiometrics;
+  }
+
+  Future _authenticateMe() async {
+    return await _localAuthentication.authenticate(
+      biometricOnly: true,
+      localizedReason: "Authenticate to login", // message for dialog
+      useErrorDialogs: true, // show error in dialog
+      stickyAuth: true, // native process
     );
   }
 }
