@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:userauth/modules/auth/routes/route.dart';
+import 'package:userauth/modules/auth/screens/login_screen.dart';
 import 'package:userauth/modules/auth/screens/signup_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -7,10 +8,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     // Auth
     case AuthRoutes.signup:
       return MaterialPageRoute(builder: (context) => const SignUpScreen());
+    case AuthRoutes.login:
+      return MaterialPageRoute(builder: (context) => const LoginScreen());
 
     default:
       {
-        return MaterialPageRoute(builder: (context) => const SignUpScreen());
+        return MaterialPageRoute(builder: (context) => const LoginScreen());
       }
   }
 }

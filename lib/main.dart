@@ -18,11 +18,11 @@ class UserAuthApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'User Auth',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: AuthRoutes.signup,
+      initialRoute: AuthRoutes.login,
       onGenerateRoute: router.generateRoute,
     );
   }

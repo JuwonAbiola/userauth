@@ -1,61 +1,37 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:userauth/helpers/alert_helper.dart';
-import 'package:userauth/modules/auth/models/signup_model.dart';
+import 'package:userauth/modules/auth/models/login_model.dart';
 import 'package:userauth/modules/auth/routes/route.dart';
 import 'package:userauth/modules/auth/services/auth_service.dart';
 import 'package:validators/validators.dart' as validator;
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
-  final _nameTextController = TextEditingController();
+class _LoginScreenState extends State<LoginScreen> {
   final _emailTextController = TextEditingController();
   final _passwordTextController = TextEditingController();
-  final _signupFormKey = GlobalKey<FormState>();
+  final _loginFormKey = GlobalKey<FormState>();
   bool obscureText = true;
   bool _isLoading = false;
-  late final SignUpModel _signUpModel = SignUpModel();
+  late final LoginModel _loginModel = LoginModel();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('Login'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
-          key: _signupFormKey,
+          key: _loginFormKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _nameTextController,
-                validator: (value) {
-                  if (!validator.isAlpha(value!)) {
-                    return 'enter a valid name';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _signUpModel.name = _nameTextController.text.trim();
-                },
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  errorBorder: UnderlineInputBorder(
-                    borderRadius: BorderRadius.circular(6.0),
-                    borderSide: const BorderSide(
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-                onChanged: (value) {},
-              ),
-              const SizedBox(height: 20),
               TextFormField(
                 controller: _emailTextController,
                 validator: (value) {
@@ -65,7 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   return null;
                 },
                 onSaved: (value) {
-                  _signUpModel.email = _emailTextController.text.trim();
+                  _loginModel.email = _emailTextController.text.trim();
                 },
                 decoration: InputDecoration(
                   labelText: 'Email',
@@ -83,7 +59,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 obscureText: obscureText,
                 controller: _passwordTextController,
                 onSaved: (value) {
-                  _signUpModel.password = _passwordTextController.text.trim();
+                  _loginModel.password = _passwordTextController.text.trim();
                 },
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -114,22 +90,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 50),
               ElevatedButton(
-                child: Text(_isLoading ? 'Please Wait...' : 'Sign Up'),
+                child: Text(_isLoading ? 'Please Wait...' : 'Login'),
                 onPressed: () async {
-                  if (_signupFormKey.currentState!.validate()) {
-                    _signupFormKey.currentState!.save();
+                  if (_loginFormKey.currentState!.validate()) {
+                    _loginFormKey.currentState!.save();
                     setState(() {
                       _isLoading = true;
                     });
                     try {
                       User? user =
-                          await AuthService.signUp(signupModel: _signUpModel);
-                      showAlert(
-                        context: context,
-                        title: 'Success',
-                        content:
-                            'Kindly check your email to verify your account.',
-                      );
+                          await AuthService.login(loginModel: _loginModel);
                     } catch (e) {
                       showAlert(
                         context: context,
@@ -148,14 +118,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account?"),
+                  const Text("Don't have an account?"),
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, AuthRoutes.login);
+                      Navigator.pushNamed(context, AuthRoutes.signup);
                     },
                     child: const Text(
-                      "Login",
+                      "Sign Up",
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
